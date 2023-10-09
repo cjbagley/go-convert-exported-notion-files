@@ -43,10 +43,10 @@ func main() {
             newExt = ".org"
         }
 
-        fmt.Println("WAS:")
-        fmt.Println(filepath.Base(path))
-        fmt.Println("NOW:")
-        fmt.Println(rawFilename + newExt)
+        err = os.Rename(path, filepath.Join(filepath.Dir(path), rawFilename + newExt))
+        if err != nil {
+            return err
+        }
 
 		return nil
 	})
@@ -80,5 +80,5 @@ func processFilename(filename string, info os.FileInfo) string {
        newParts = append(newParts, strings.ToLower(p))
     }
 
-    return strings.Join(newParts, "-") 
+    return strings.ReplaceAll(strings.Join(newParts, "-"), "---", "-") 
 }
