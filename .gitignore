@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+# Dont commit the compiled script
+go-convert-exported-notion-files

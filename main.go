@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 )
 
 func main() {
@@ -69,6 +70,15 @@ func isValidDirectory(path string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func processFilename(path string, info os.FileInfo) string {
-    return path
+func processFilename(filename string, info os.FileInfo) string {
+    var newParts []string
+    for _, p := range strings.Split(filename, " ") {
+       // Remove the notion hashes
+       if utf8.RuneCountInString(p) == 32 {
+           continue
+       }
+       newParts = append(newParts, strings.ToLower(p))
+    }
+
+    return strings.Join(newParts, "-") 
 }
