@@ -4,34 +4,71 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
-    flag.Parse()
-    dir := flag.Arg(0)
-    
-    if dir == "" {
-        exit("Please specify a directory")
-    }
+	flag.Parse()
+	dir := flag.Arg(0)
 
-    isDir, err := isValidDirectory(dir)
-    if !isDir || err != nil {
-        exit("Not a directory")
-    }
+	if dir == "" {
+		exit("Please specify a directory")
+	}
 
-    fmt.Println("okay")
+	isDir, err := isValidDirectory(dir)
+	if !isDir || err != nil {
+		exit("Not a directory")
+	}
+
+	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+        if info.IsDir() {
+            return nil
+        }
+
+        rawFilename := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+        if rawFilename == "" || rawFilename == "." {
+            return nil
+        }
+
+        rawFilename = processFilename(rawFilename, info)
+
+        newExt := filepath.Ext(path)
+        if newExt == ".md" {
+            newExt = ".org"
+        }
+
+        fmt.Println("WAS:")
+        fmt.Println(filepath.Base(path))
+        fmt.Println("NOW:")
+        fmt.Println(rawFilename + newExt)
+
+		return nil
+	})
+
+	if err != nil {
+		exit(err.Error())
+	}
 }
 
 func exit(message string) {
-    fmt.Println(message)
-    os.Exit(1)
+	fmt.Println(message)
+	os.Exit(1)
 }
 
 func isValidDirectory(path string) (bool, error) {
-    info, err := os.Stat(path)
-    if err != nil {
-        return false, err
-    }
+	info, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
 
-    return info.IsDir(), nil
+	return info.IsDir(), nil
+}
+
+func processFilename(path string, info os.FileInfo) string {
+    return path
 }
